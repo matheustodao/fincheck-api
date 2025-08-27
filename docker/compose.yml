@@ -4,14 +4,14 @@ services:
     container_name: database_fincheck
     restart: always
     env_file:
-      - ..database.env
+      - ../database.env
     ports:
       - "5432:5432"
 
   api:
     container_name: api_fincheck
     env_file:
-      - ..api.env
+      - ../api.env
     build:
       context: ..
       dockerfile: ./docker/Dockerfile
@@ -26,7 +26,7 @@ services:
     container_name: grafana_fincheck
     restart: unless-stopped
     env_file:
-      - ..grafana.env
+      - ../grafana.env
     ports:
       - "3005:3000"
     depends_on:
