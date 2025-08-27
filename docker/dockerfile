@@ -1,0 +1,27 @@
+FROM node:current-alpine3.22 AS base
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+COPY . /app
+WORKDIR /app
+
+FROM base AS package-deps
+COPY ./pnpm-lock.yaml /app
+COPY ./package.json /app
+
+FROM base AS prod-deps
+COPY --from=package-deps /app/pnpm-lock.yaml /app
+COPY --from=package-deps /app/package.json /app
+# Using a cache mount to speed up installs
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+
+FROM base AS build
+COPY --from=prod-deps /app/node_modules /app/node_modules
+RUN pnpm build
+
+FROM base
+COPY --from=prod-deps /app/node_modules /app/node_modules
+COPY --from=build /app/dist /app/dist
+EXPOSE 3000
+CMD ["pnpm", "start:prod"]
