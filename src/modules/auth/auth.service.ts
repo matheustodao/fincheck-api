@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthenticateUserDTO } from './dto/authenticate.dto';
 import { UsersRepository } from 'src/shared/database/repositories/users.repository';
 import bcrypt from 'bcryptjs';
@@ -12,13 +16,13 @@ export class AuthService {
     const user = await this.users_repository.findByEmail(email);
 
     if (!user) {
-      throw new BadRequestException('Invalid credentials');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordMatching = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatching) {
-      throw new BadRequestException('Invalid credentials');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     return {
