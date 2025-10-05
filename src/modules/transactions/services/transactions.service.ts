@@ -62,29 +62,31 @@ export class TransactionsService {
     });
   }
 
-  async remove(user_id: string, transaction_id) {
+  async remove(user_id: string, transaction_id: string) {
+    await this.validateEntitiesOwnership(user_id, {
+      transactionId: transaction_id,
+    });
     return await this.transaction_repository.delete(user_id, transaction_id);
   }
 
   private async validateEntitiesOwnership(
     userId: string,
-    entities: {
+    entities?: {
       categoryId?: string;
       bankAccountId?: string;
       transactionId?: string;
     },
   ) {
-    const { bankAccountId, categoryId } = entities;
-
     await Promise.all([
       entities?.transactionId &&
         this.transaction_repository.findFirst({
           id: entities.transactionId,
           userId,
         }),
-      bankAccountId &&
-        this.bank_account_ownership.validate(userId, bankAccountId),
-      categoryId && this.category_ownership.validate(userId, categoryId),
+      entities?.bankAccountId &&
+        this.bank_account_ownership.validate(userId, entities.bankAccountId),
+      entities?.categoryId &&
+        this.category_ownership.validate(userId, entities.categoryId),
     ]);
   }
 }
