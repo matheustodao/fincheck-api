@@ -1,0 +1,13 @@
+import { Controller, Get } from '@nestjs/common';
+import { CategoriesService } from './categories.service';
+import { ActiveUserId } from 'src/shared/decorators/active-user';
+
+@Controller('categories')
+export class CategoriesController {
+  constructor(private readonly categoriesService: CategoriesService) {}
+
+  @Get()
+  findAll(@ActiveUserId() user_id: string) {
+    return this.categoriesService.findAllByUserId(user_id);
+  }
+}
