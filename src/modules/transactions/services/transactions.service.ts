@@ -69,23 +69,22 @@ export class TransactionsService {
   private async validateEntitiesOwnership(
     userId: string,
     entities: {
-      categoryId: string;
-      bankAccountId: string;
+      categoryId?: string;
+      bankAccountId?: string;
       transactionId?: string;
     },
   ) {
     const { bankAccountId, categoryId } = entities;
 
     await Promise.all([
-      this.bank_account_ownership.validate(userId, bankAccountId),
-      this.category_ownership.validate(userId, categoryId),
+      entities?.transactionId &&
+        this.transaction_repository.findFirst({
+          id: entities.transactionId,
+          userId,
+        }),
+      bankAccountId &&
+        this.bank_account_ownership.validate(userId, bankAccountId),
+      categoryId && this.category_ownership.validate(userId, categoryId),
     ]);
-
-    if (entities?.transactionId) {
-      await this.transaction_repository.findFirst({
-        id: entities.transactionId,
-        userId,
-      });
-    }
   }
 }
