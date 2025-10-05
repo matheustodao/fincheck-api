@@ -14,4 +14,20 @@ export class CategoriesRepository {
 
     return categories ?? [];
   }
+
+  async findFirst(bankAccount: Partial<Category>) {
+    const { icon, id, name, type, userId } = bankAccount;
+
+    const foundFirstCategory = await this.prisma.category.findFirst({
+      where: {
+        id,
+        type,
+        name,
+        icon,
+        userId,
+      },
+    });
+
+    return foundFirstCategory;
+  }
 }
