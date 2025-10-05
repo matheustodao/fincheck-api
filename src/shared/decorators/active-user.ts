@@ -15,3 +15,20 @@ export const ActiveUser = createParamDecorator<undefined, IJwtAccessToken>(
     return user;
   },
 );
+
+export const ActiveUserId = createParamDecorator<undefined, string>(
+  (_, context) => {
+    const request: Request = context.switchToHttp().getRequest();
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const user: IJwtAccessToken = request?.['user'];
+
+    console.debug(user);
+
+    if (!user) {
+      throw new UnauthorizedException('Authentication token is missing');
+    }
+
+    return user.sub;
+  },
+);
