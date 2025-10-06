@@ -1,6 +1,13 @@
 import { PrismaService } from 'src/shared/database/prisma.service';
-import { Transaction } from '@prisma/client';
+import { Transaction, TransactionType } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
+
+export class TransactionFilterParams {
+  month?: number;
+  year?: number;
+  bankAccountId?: string;
+  type?: TransactionType;
+}
 
 @Injectable()
 export class TransactionsRepository {
@@ -30,11 +37,32 @@ export class TransactionsRepository {
     return createdTransaction;
   }
 
-  async findManyByUserId(userId: string): Promise<Transaction[]> {
+  async findManyByUserId(
+    userId: string,
+    filter?: TransactionFilterParams,
+  ): Promise<Transaction[]> {
+    const date = new Date();
+    const currentYear = date.getFullYear();
+    const currentMonth = date.getMonth();
+    const safeYear = filter?.year ? filter?.year : currentYear;
+    const safeMonth = filter?.month ? filter.month : currentMonth;
+
+    const isDateFilter =
+      typeof filter?.month === 'number' || typeof filter?.year === 'number';
+
     const transactions = await this.prisma.transaction.findMany({
       where: {
         userId,
+        date: isDateFilter
+          ? {
+              gte: new Date(Date.UTC(safeYear, safeMonth)),
+              lt: new Date(Date.UTC(safeYear, safeMonth + 1)),
+            }
+          : undefined,
+        bankAccountId: this.handleFilter(filter?.bankAccountId),
+        type: this.handleFilter(filter?.type),
       },
+      orderBy: { date: 'desc' },
     });
 
     return transactions ?? [];
@@ -106,5 +134,16 @@ export class TransactionsRepository {
         id: transactionId,
       },
     });
+  }
+
+  private handleFilter<T = any>(
+    value: T | undefined,
+    condition: boolean = true,
+  ): T | undefined {
+    if (typeof value === 'undefined' || !value || !condition) {
+      return undefined;
+    }
+
+    return value;
   }
 }
