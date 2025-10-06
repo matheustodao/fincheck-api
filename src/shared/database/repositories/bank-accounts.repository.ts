@@ -1,6 +1,18 @@
 import { PrismaService } from 'src/shared/database/prisma.service';
 import { BankAccount } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
+import { TransactionType } from 'src/modules/transactions/entities/transaction.entity';
+import { BankAccountType } from 'src/modules/bank-accounts/entities/bank-account.entity';
+
+class BankAccountWithCurrentBalance implements Omit<BankAccount, 'type'> {
+  name: string;
+  id: string;
+  userId: string;
+  initialBalance: number;
+  type: BankAccountType;
+  color: string;
+  currentBalance: number;
+}
 
 @Injectable()
 export class BankAccountsRepository {
@@ -27,14 +39,62 @@ export class BankAccountsRepository {
     return newBankAccount;
   }
 
-  async findManyByUserId(userId: string): Promise<BankAccount[]> {
+  async findManyByUserId(
+    userId: string,
+  ): Promise<BankAccountWithCurrentBalance[]> {
     const bankAccounts = await this.prisma.bankAccount.findMany({
       where: {
         userId,
       },
+      include: {
+        transactions: {
+          select: {
+            amount: true,
+            type: true,
+          },
+        },
+      },
     });
 
-    return bankAccounts ?? [];
+    const bankAccountsWithCurrentBalance = bankAccounts.reduce<
+      BankAccountWithCurrentBalance[]
+    >((allBankAccounts, currentBankAccount) => {
+      const currentBalance = currentBankAccount.transactions.reduce(
+        (totalBalance, transaction) => {
+          const typesWithMinus: TransactionType[] = [
+            TransactionType.EXPENSE,
+            TransactionType.TRANSFER,
+          ];
+
+          const type = transaction.type as TransactionType;
+
+          const operator = typesWithMinus.indexOf(type) !== -1 ? '-' : '';
+
+          const newBalance =
+            totalBalance +
+            Number.parseFloat(`${operator}${transaction.amount}`);
+
+          totalBalance = newBalance;
+
+          return totalBalance;
+        },
+        currentBankAccount.initialBalance,
+      );
+
+      allBankAccounts.push({
+        currentBalance: Number.parseFloat(currentBalance.toFixed(2)),
+        id: currentBankAccount.id,
+        userId: currentBankAccount.userId,
+        color: currentBankAccount.color,
+        initialBalance: currentBankAccount.initialBalance,
+        name: currentBankAccount.name,
+        type: currentBankAccount.type as BankAccountType,
+      });
+
+      return allBankAccounts;
+    }, []);
+
+    return bankAccountsWithCurrentBalance ?? [];
   }
 
   async findById(bankAccountId: string) {
