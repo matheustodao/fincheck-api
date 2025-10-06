@@ -23,8 +23,6 @@ export const ActiveUserId = createParamDecorator<undefined, string>(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const user: IJwtAccessToken = request?.['user'];
 
-    console.debug(user);
-
     if (!user) {
       throw new UnauthorizedException('Authentication token is missing');
     }

@@ -54,7 +54,7 @@ export class BankAccountsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(
     @ActiveUserId() user_id: string,
-    @Param('bankAccountId') bankAccountId: string,
+    @Param('bankAccountId', ParseUUIDPipe) bankAccountId: string,
   ) {
     return this.bankAccountsService.remove(user_id, bankAccountId);
   }
