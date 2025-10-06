@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTransactionDto } from '../dto/create-transaction.dto';
 import { UpdateTransactionDto } from '../dto/update-transaction.dto';
-import { TransactionsRepository } from 'src/shared/database/repositories/transactions.repository';
+import {
+  TransactionFilterParams,
+  TransactionsRepository,
+} from 'src/shared/database/repositories/transactions.repository';
 import { ValidateBankAccountsOwnershipService } from 'src/modules/bank-accounts/services/validate-bank-account-ownership.service';
 import { ValidateCategoryOwnershipService } from 'src/modules/categories/services/validate-category-ownership.service';
 
@@ -31,9 +34,11 @@ export class TransactionsService {
     });
   }
 
-  async findAllByUserId(user_id: string) {
-    const transactions =
-      await this.transaction_repository.findManyByUserId(user_id);
+  async findAllByUserId(user_id: string, filters?: TransactionFilterParams) {
+    const transactions = await this.transaction_repository.findManyByUserId(
+      user_id,
+      filters,
+    );
 
     return transactions;
   }
