@@ -15,6 +15,7 @@ import { CreateBankAccountDto } from './dto/create-bank-account.dto';
 import { UpdateBankAccountDto } from './dto/update-bank-account.dto';
 import { ActiveUserId } from 'src/shared/decorators/active-user';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { BankAccountWithCurrentBalance } from 'src/shared/database/repositories/bank-accounts.repository';
 
 @ApiBearerAuth()
 @Controller('bank-accounts')
@@ -30,7 +31,9 @@ export class BankAccountsController {
   }
 
   @Get()
-  findAll(@ActiveUserId() user_id: string) {
+  findAll(
+    @ActiveUserId() user_id: string,
+  ): Promise<BankAccountWithCurrentBalance[]> {
     return this.bankAccountsService.findAll(user_id);
   }
 
