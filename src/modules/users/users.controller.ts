@@ -10,12 +10,15 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ActiveUser } from 'src/shared/decorators/active-user';
 import type { IJwtAccessToken } from 'src/types/jwt-access-token';
+import { ApiBearerAuth, ApiExcludeEndpoint } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @ApiExcludeEndpoint()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
