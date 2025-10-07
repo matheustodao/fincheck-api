@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule } from '@nestjs/swagger';
+import { FincheckSwagger } from './config/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -9,6 +11,10 @@ async function bootstrap() {
   app.enableCors({
     origin: process.env.ENABLE_CORS_TO_ORIGIN_WEB_CLIENT,
   });
+
+  const swagger = new FincheckSwagger(SwaggerModule);
+
+  swagger.setup(app);
 
   await app.listen(process.env.PORT ?? 3000);
 }
