@@ -10,6 +10,9 @@ export class FincheckSwagger {
       .setTitle('Fincheck API')
       .setDescription('Fincheck is financial management')
       .setVersion('1.0')
+      .addBearerAuth({
+        type: 'http',
+      })
       .build();
 
     return config;
