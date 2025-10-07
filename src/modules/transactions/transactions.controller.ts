@@ -19,7 +19,9 @@ import { OptionalParseIntPipe } from 'src/shared/pipes/optional-parse-int-pipe';
 import { OptionalParseUUIDPipe } from 'src/shared/pipes/optional-parse-uuid-pipe';
 import { OptionalParseEnumPipe } from 'src/shared/pipes/optional-parse-enum-pipe';
 import { TransactionType } from './entities/transaction.entity';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('transactions')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
