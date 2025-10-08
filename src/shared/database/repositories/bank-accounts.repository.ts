@@ -3,14 +3,35 @@ import { BankAccount } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { TransactionType } from 'src/modules/transactions/entities/transaction.entity';
 import { BankAccountType } from 'src/modules/bank-accounts/entities/bank-account.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
-class BankAccountWithCurrentBalance implements Omit<BankAccount, 'type'> {
+export class BankAccountWithCurrentBalance
+  implements Omit<BankAccount, 'type'>
+{
+  @ApiProperty({ description: 'Nome da conta bancária' })
   name: string;
+
+  @ApiProperty({ description: 'ID único da conta bancária' })
   id: string;
+
+  @ApiProperty({ description: 'ID do usuário proprietário da conta' })
   userId: string;
+
+  @ApiProperty({ description: 'Saldo inicial da conta' })
   initialBalance: number;
+
+  @ApiProperty({
+    description: 'Tipo da conta bancária',
+    enum: BankAccountType,
+  })
   type: BankAccountType;
+
+  @ApiProperty({ description: 'Cor da conta para identificação visual' })
   color: string;
+
+  @ApiProperty({
+    description: 'Saldo atual da conta (calculado com base nas transações)',
+  })
   currentBalance: number;
 }
 
